@@ -14,7 +14,11 @@ export const setupServer = () => {
   app.use(cors());
   app.use(pino());
 
-  app.get(`/contacts`, getContactsController);
+  app.get('/', (req, res) => {
+    res.json({ message: 'API is running' });
+  });
+
+  app.get('/contacts', getContactsController);
   app.get('/contacts/:contactId', getContactByIdController);
 
   app.use((req, res) => {
