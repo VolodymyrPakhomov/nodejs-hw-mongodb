@@ -40,12 +40,12 @@ export const createContactController = async (req, res) => {
     contactType,
   } = req.body;
 
-  if (!name || !phoneNumber || !contactType) {
-    throw createError(
-      400,
-      'Missing required fields: name, phoneNumber, contactType',
-    );
-  }
+  // if (!name || !phoneNumber || !contactType) {
+  //   throw createError(
+  //     400,
+  //     'Missing required fields: name, phoneNumber, contactType',
+  //   );
+  // }
 
   const contactData = { name, phoneNumber, email, isFavourite, contactType };
   const newContact = await createContact(contactData);
@@ -61,9 +61,9 @@ export const updateContactController = async (req, res) => {
   const { contactId } = req.params;
   const updateData = req.body;
 
-  if (Object.keys(updateData).length === 0) {
-    throw createError(400, 'No fields to update');
-  }
+  // if (Object.keys(updateData).length === 0) {
+  //   throw createError(400, 'No fields to update');
+  // }
 
   const updatedContact = await updateContact(contactId, updateData);
   if (!updatedContact) {
