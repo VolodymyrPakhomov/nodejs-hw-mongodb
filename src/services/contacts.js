@@ -1,6 +1,6 @@
 import { Contact } from '../models/contact.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
-
+// This service file handles the business logic for contacts, including CRUD operations.
 export const getAllContacts = async ({
   page,
   perPage,
@@ -37,11 +37,9 @@ export const createContact = async (payload) => {
 };
 
 export const updateContact = async (contactId, payload, userId) => {
-  return await Contact.findOneAndUpdate(
-    { _id: contactId, userId },
-    payload,
-    { new: true }
-  );
+  return await Contact.findOneAndUpdate({ _id: contactId, userId }, payload, {
+    new: true,
+  });
 };
 
 export const deleteContact = async (contactId, userId) => {
