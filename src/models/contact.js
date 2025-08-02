@@ -12,7 +12,7 @@ const contactSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
+      required: false, //  false
     },
     isFavourite: {
       type: Boolean,
@@ -22,12 +22,17 @@ const contactSchema = new mongoose.Schema(
       type: String,
       enum: ['personal', 'work'],
       default: 'personal',
+      required: true,
+    },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
   },
   {
-    timestamps: true, // автоматично додає createdAt і updatedAt
+    timestamps: true,
   },
 );
 
-// створюємо модель
 export const Contact = mongoose.model('Contact', contactSchema);
