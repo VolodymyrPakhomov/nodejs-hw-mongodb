@@ -6,6 +6,8 @@ import contactsRouter from './routers/contacts.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
 
+import authRouters from './routers/auth.js';
+
 dotenv.config();
 
 export const setupServer = () => {
@@ -14,6 +16,8 @@ export const setupServer = () => {
   app.use(cors());
   app.use(pino());
   app.use(express.json());
+
+  app.use('/auth', authRouters);
 
   app.get('/', (req, res) => {
     res.json({ message: 'API is running' });
