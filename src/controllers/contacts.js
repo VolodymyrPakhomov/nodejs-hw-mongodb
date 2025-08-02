@@ -10,16 +10,20 @@ import {
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 
 import { parseSortParams } from '../utils/parseSortParams.js';
+import { parseFilterParams } from '../utils/parseFilterParams.js';
 
 export const getContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
+  const filter = parseFilterParams(req.query);
 
   const paginationResult = await getAllContacts({
     page,
     perPage,
     sortBy,
     sortOrder,
+    filter,
+    userId: req.user._id,
   });
 
   res.status(200).json({
@@ -31,7 +35,7 @@ export const getContactsController = async (req, res) => {
 
 export const getContactByIdController = async (req, res) => {
   const { contactId } = req.params;
-  const contact = await getContactById(contactId);
+  const contact = await getContactById(contactId, req.user._id);
 
   if (!contact) {
     throw createError(404, 'Contact not found');
@@ -60,7 +64,7 @@ export const createContactController = async (req, res) => {
   //   );
   // }
 
-  const contactData = { name, phoneNumber, email, isFavourite, contactType };
+  const contactData = { ...req.body, userId: req.user._id };
   const newContact = await createContact(contactData);
 
   res.status(201).json({
@@ -78,7 +82,7 @@ export const updateContactController = async (req, res) => {
   //   throw createError(400, 'No fields to update');
   // }
 
-  const updatedContact = await updateContact(contactId, updateData);
+  const updatedContact = await updateContact(contactId, req.body, req.user._id);
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
   }
@@ -93,7 +97,7 @@ export const updateContactController = async (req, res) => {
 export const deleteContactController = async (req, res) => {
   const { contactId } = req.params;
 
-  const deletedContact = await deleteContact(contactId);
+  const deletedContact = await deleteContact(contactId, req.user._id);
   if (!deletedContact) {
     throw createError(404, 'Contact not found');
   }

@@ -5,8 +5,11 @@ import dotenv from 'dotenv';
 import contactsRouter from './routers/contacts.js';
 import errorHandler from './middlewares/errorHandler.js';
 import notFoundHandler from './middlewares/notFoundHandler.js';
+import authenticate from './middlewares/authenticate.js';
 
 import authRouters from './routers/auth.js';
+
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -15,7 +18,9 @@ export const setupServer = () => {
 
   app.use(cors());
   app.use(pino());
+
   app.use(express.json());
+  app.use(cookieParser());
 
   app.use('/auth', authRouters);
 
@@ -23,7 +28,7 @@ export const setupServer = () => {
     res.json({ message: 'API is running' });
   });
 
-  app.use('/contacts', contactsRouter);
+  app.use('/contacts', authenticate, contactsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
