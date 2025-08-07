@@ -19,6 +19,7 @@ import {
 } from '../validation/auth.js';
 
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
+import { User } from '../models/user.js';
 
 const router = express.Router();
 
@@ -50,4 +51,21 @@ router.post(
   validateBody(resetPasswordSchema),
   ctrlWrapper(resetPasswordController),
 );
+
+router.post(
+  '/reset-pwd',
+  validateBody(resetPasswordSchema),
+  ctrlWrapper(resetPasswordController),
+);
+
+// Тимчасовий endpoint для перегляду користувачів
+router.get('/users', async (req, res) => {
+  const users = await User.find({}, { password: 0 });
+  res.json({
+    status: 200,
+    message: 'Users list',
+    data: users,
+  });
+});
+
 export default router;

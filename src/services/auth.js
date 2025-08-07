@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import crypto from 'node:crypto';
 
 import path from 'node:path';
@@ -11,7 +14,7 @@ import { User } from '../models/user.js';
 import { Session } from '../models/session.js';
 
 import jwt from 'jsonwebtoken';
-import { SMTP } from '../constants/index.js';
+import { SMTP, TEMPLATES_DIR } from '../constants/index.js';
 
 import { getEnvVariable } from '../utils/getEnvVariable.js';
 import { sendEmail } from '../utils/sendMail.js';
@@ -88,23 +91,40 @@ export const requestResetToken = async (email) => {
       email,
     },
     getEnvVariable('JWT_SECRET'),
-    { expiresIn: '5m' },
+    {
+      expiresIn: '5m',
+    },
   );
-  console.log('Reset token for testing:', resetToken);
-  
-  // Простий HTML без шаблону
-  const html = `<p>Hello ${user.name}!</p><p>Click <a href="${getEnvVariable('APP_DOMAIN')}/reset-password?token=${resetToken}">here</a> to reset your password!</p>`;
 
-  // Закоментовано для тестування
-  // await sendEmail({
-  //   from: getEnvVariable(SMTP.SMTP_FROM),
-  //   to: email,
-  //   subject: 'Password Reset Request',
-  //   html,
-  // });
-  
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
+
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
+
+  const template = handlebars.compile(templateSource);
+  const html = template({
+    name: user.name,
+    link: `${getEnvVariable('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+  });
+
+  // Тимчасово закоментовано для тестування без Brevo
+  console.log('Reset token generated:', resetToken);
+  console.log(
+    'Reset link:',
+    `${getEnvVariable('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+  );
   console.log('Email would be sent to:', email);
-  console.log('Reset link:', `${getEnvVariable('APP_DOMAIN')}/reset-password?token=${resetToken}`);
+
+  await sendEmail({
+    from: getEnvVariable(SMTP.SMTP_FROM),
+    to: email,
+    subject: 'Reset your password',
+    html,
+  });
 };
 /////////////////
 export const resetPassword = async (payload) => {
@@ -112,7 +132,8 @@ export const resetPassword = async (payload) => {
   try {
     entries = jwt.verify(payload.token, getEnvVariable('JWT_SECRET'));
   } catch (error) {
-    if (error instanceof Error) throw createHttpError(401, error.message);
+    if (error instanceof Error)
+      throw createHttpError(401, 'Token is expired or invalid.');
     throw error;
   }
 
@@ -123,6 +144,10 @@ export const resetPassword = async (payload) => {
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
-  const encryptedPassword = await bcrypt.hash(payload.password, 5);
+
+  const encryptedPassword = await bcrypt.hash(payload.password, 10);
   await User.updateOne({ _id: user._id }, { password: encryptedPassword });
+
+  // Видаляємо поточну сесію для цього користувача
+  await Session.deleteMany({ userId: user._id });
 };

@@ -13,8 +13,12 @@ export const sendEmail = async (options) => {
     },
   });
 
-  // Використовуємо хардкод email як from
-  options.from = 'vmudrij0508@gmail.com';
-  
-  return await transporter.sendMail(options);
+  try {
+    const result = await transporter.sendMail(options);
+    console.log('✅ Email sent:', result);
+    return result;
+  } catch (error) {
+    console.error('❌ EMAIL ERROR:', error); // <-- ТУТ буде реальна причина!
+    throw new Error('Failed to send the email, please try again later.');
+  }
 };

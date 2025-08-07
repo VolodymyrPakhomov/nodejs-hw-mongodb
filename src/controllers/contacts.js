@@ -6,6 +6,7 @@ import {
   updateContact,
   deleteContact,
 } from '../services/contacts.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 
@@ -49,40 +50,32 @@ export const getContactByIdController = async (req, res) => {
 };
 
 export const createContactController = async (req, res) => {
-  const {
-    name,
-    phoneNumber,
-    email,
-    isFavourite = false,
-    contactType,
-  } = req.body;
-
-  // if (!name || !phoneNumber || !contactType) {
-  //   throw createError(
-  //     400,
-  //     'Missing required fields: name, phoneNumber, contactType',
-  //   );
-  // }
-
-  const contactData = { ...req.body, userId: req.user._id };
-  const newContact = await createContact(contactData);
+  const { body, user, file } = req;
+  
+  let photoUrl;
+  if (file) {
+    photoUrl = await saveFileToCloudinary(file);
+  }
+  
+  const contact = await createContact({ ...body, photo: photoUrl }, user._id);
 
   res.status(201).json({
     status: 201,
-    message: 'Successfully created a contact!',
-    data: newContact,
+    message: `Successfully created a contact!`,
+    data: contact,
   });
 };
 
 export const updateContactController = async (req, res) => {
   const { contactId } = req.params;
-  const updateData = req.body;
+  const { file } = req;
+  
+  let photoUrl;
+  if (file) {
+    photoUrl = await saveFileToCloudinary(file);
+  }
 
-  // if (Object.keys(updateData).length === 0) {
-  //   throw createError(400, 'No fields to update');
-  // }
-
-  const updatedContact = await updateContact(contactId, req.body, req.user._id);
+  const updatedContact = await updateContact(contactId, { ...req.body, photo: photoUrl }, req.user._id);
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
   }
@@ -103,4 +96,25 @@ export const deleteContactController = async (req, res) => {
   }
 
   res.status(204).send();
+};
+
+export const patchContactController = async (req, res) => {
+  const { params, body, file, user } = req;
+  const contactId = params.contactId;
+
+  const contact = await updateContact(
+    contactId,
+    { ...body, photo: file },
+    user._id,
+  );
+
+  if (!contact) {
+    throw createError(404, 'Contact not found');
+  }
+
+  res.status(200).json({
+    status: 200,
+    message: `Successfully patched a contact!`,
+    data: contact,
+  });
 };
