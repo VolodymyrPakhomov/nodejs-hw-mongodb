@@ -83,10 +83,15 @@ export const updateContactController = async (req, res) => {
   
   let photoUrl;
   if (file) {
-    if (getEnvVariable('ENABLE_CLOUDINARY') === 'true') {
-      photoUrl = await saveFileToCloudinary(file);
-    } else {
-      photoUrl = await saveFileToUploadDir(file);
+    try {
+      if (getEnvVariable('ENABLE_CLOUDINARY') === 'true') {
+        photoUrl = await saveFileToCloudinary(file);
+      } else {
+        photoUrl = await saveFileToUploadDir(file);
+      }
+    } catch (error) {
+      console.error('Error saving file:', error);
+      throw createError(500, 'Failed to upload photo');
     }
   }
 

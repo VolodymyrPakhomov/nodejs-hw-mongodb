@@ -92,7 +92,7 @@ export const requestResetToken = async (email) => {
     },
     getEnvVariable('JWT_SECRET'),
     {
-      expiresIn: '5m',
+      expiresIn: '15m', // Збільшено до 15 хвилин для тестування
     },
   );
 
