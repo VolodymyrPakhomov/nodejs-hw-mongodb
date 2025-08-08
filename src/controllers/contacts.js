@@ -7,6 +7,8 @@ import {
   deleteContact,
 } from '../services/contacts.js';
 import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { getEnvVariable } from '../utils/getEnvVariable.js';
 
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 
@@ -54,7 +56,16 @@ export const createContactController = async (req, res) => {
   
   let photoUrl;
   if (file) {
-    photoUrl = await saveFileToCloudinary(file);
+    try {
+      if (getEnvVariable('ENABLE_CLOUDINARY') === 'true') {
+        photoUrl = await saveFileToCloudinary(file);
+      } else {
+        photoUrl = await saveFileToUploadDir(file);
+      }
+    } catch (error) {
+      console.error('Error saving file:', error);
+      throw createError(500, 'Failed to upload photo');
+    }
   }
   
   const contact = await createContact({ ...body, photo: photoUrl }, user._id);
@@ -72,7 +83,11 @@ export const updateContactController = async (req, res) => {
   
   let photoUrl;
   if (file) {
-    photoUrl = await saveFileToCloudinary(file);
+    if (getEnvVariable('ENABLE_CLOUDINARY') === 'true') {
+      photoUrl = await saveFileToCloudinary(file);
+    } else {
+      photoUrl = await saveFileToUploadDir(file);
+    }
   }
 
   const updatedContact = await updateContact(contactId, { ...req.body, photo: photoUrl }, req.user._id);

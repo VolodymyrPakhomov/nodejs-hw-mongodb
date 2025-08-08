@@ -11,6 +11,8 @@ import authRouters from './routers/auth.js';
 
 import cookieParser from 'cookie-parser';
 
+import { UPLOAD_DIR } from './constants/index.js';
+
 dotenv.config();
 
 export const setupServer = () => {
@@ -32,6 +34,8 @@ export const setupServer = () => {
 
   app.use(notFoundHandler);
   app.use(errorHandler);
+
+  app.use('/uploads', express.static(UPLOAD_DIR));
 
   const PORT = process.env.PORT || 3000;
 
