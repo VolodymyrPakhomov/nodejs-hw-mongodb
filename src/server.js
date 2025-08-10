@@ -24,6 +24,8 @@ export const setupServer = () => {
   app.use(express.json());
   app.use(cookieParser());
 
+  app.use('/uploads', express.static(UPLOAD_DIR));
+  
   app.use('/auth', authRouters);
 
   app.get('/', (req, res) => {
@@ -34,8 +36,6 @@ export const setupServer = () => {
 
   app.use(notFoundHandler);
   app.use(errorHandler);
-
-  app.use('/uploads', express.static(UPLOAD_DIR));
 
   const PORT = process.env.PORT || 3000;
 
