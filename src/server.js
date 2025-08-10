@@ -2,10 +2,17 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
 import dotenv from 'dotenv';
-import {
-  getContactsController,
-  getContactByIdController,
-} from './controllers/contacts.js';
+import contactsRouter from './routers/contacts.js';
+import errorHandler from './middlewares/errorHandler.js';
+import notFoundHandler from './middlewares/notFoundHandler.js';
+import authenticate from './middlewares/authenticate.js';
+
+import authRouters from './routers/auth.js';
+
+import cookieParser from 'cookie-parser';
+
+import { UPLOAD_DIR } from './constants/index.js';
+
 dotenv.config();
 
 export const setupServer = () => {
@@ -14,16 +21,21 @@ export const setupServer = () => {
   app.use(cors());
   app.use(pino());
 
+  app.use(express.json());
+  app.use(cookieParser());
+
+  app.use('/uploads', express.static(UPLOAD_DIR));
+  
+  app.use('/auth', authRouters);
+
   app.get('/', (req, res) => {
     res.json({ message: 'API is running' });
   });
 
-  app.get('/contacts', getContactsController);
-  app.get('/contacts/:contactId', getContactByIdController);
+  app.use('/contacts', authenticate, contactsRouter);
 
-  app.use((req, res) => {
-    res.status(404).json({ message: 'Not found' });
-  });
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
   const PORT = process.env.PORT || 3000;
 
