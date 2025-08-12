@@ -68,4 +68,12 @@ router.get('/users', async (req, res) => {
   });
 });
 
+// router.get('/get-oauth-url', ctrlWrapper(getOAuthController));
+
+// router.post(
+//   '/confirm-oauth',
+//   validateBody(confirmOAuthSchema),
+//   ctrlWrapper(confirmOAuthController),
+// );
+
 export default router;

@@ -12,6 +12,7 @@ import authRouters from './routers/auth.js';
 import cookieParser from 'cookie-parser';
 
 import { UPLOAD_DIR } from './constants/index.js';
+import { swaggerDocs } from './middlewares/swaggerDocs.js';
 
 dotenv.config();
 
@@ -25,6 +26,8 @@ export const setupServer = () => {
   app.use(cookieParser());
 
   app.use('/uploads', express.static(UPLOAD_DIR));
+  
+  app.use('/api-docs', swaggerDocs());
   
   app.use('/auth', authRouters);
 

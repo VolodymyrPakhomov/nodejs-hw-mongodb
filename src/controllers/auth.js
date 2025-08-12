@@ -87,7 +87,10 @@ export const requestResetEmailController = async (req, res) => {
       throw error;
     }
     console.error('Error:', error);
-    throw createHttpError(500, 'Failed to send the email, please try again later.');
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
   }
 };
 
@@ -99,3 +102,17 @@ export const resetPasswordController = async (req, res) => {
     data: {},
   });
 };
+
+// 7hw
+
+// export async function getOAuthController(req, res) {
+//   const url = await getOAuthURL();
+
+//   res.json({
+//     status: 200,
+//     message: 'Successfully get OAuth url',
+//     data: {
+//       oauth_url: url,
+//     },
+//   });
+// }
