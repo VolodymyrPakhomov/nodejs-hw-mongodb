@@ -13,16 +13,35 @@ parameters:
       example: 1
     description: Page number for pagination
   - in: query
-    name: limit
+    name: perPage
     schema:
       type: integer
       example: 10
     description: Number of contacts per page
   - in: query
-    name: favourite
+    name: sortBy
+    schema:
+      type: string
+      example: name
+    description: Field to sort by
+  - in: query
+    name: sortOrder
+    schema:
+      type: string
+      enum: [asc, desc]
+      example: asc
+    description: Sort order
+  - in: query
+    name: isFavourite
     schema:
       type: boolean
     description: Filter by favourite status
+  - in: query
+    name: contactType
+    schema:
+      type: string
+      enum: [work, personal]
+    description: Filter by contact type
 responses:
   '200':
     description: Successfully retrieved contacts
@@ -36,10 +55,31 @@ responses:
               example: 200
             message:
               type: string
-              example: Successfully retrieved contacts list!
+              example: Successfully found contacts!
             data:
-              type: array
-              items:
-                $ref: ../../components/schemas/contact.yaml
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: ../../components/schemas/contact.yaml
+                page:
+                  type: integer
+                  example: 1
+                perPage:
+                  type: integer
+                  example: 10
+                totalItems:
+                  type: integer
+                  example: 4
+                totalPages:
+                  type: integer
+                  example: 1
+                hasNextPage:
+                  type: boolean
+                  example: false
+                hasPreviousPage:
+                  type: boolean
+                  example: false
   '401':
     $ref: ../../components/responses/401.yaml

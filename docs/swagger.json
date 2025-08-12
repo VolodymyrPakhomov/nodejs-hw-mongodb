@@ -53,7 +53,7 @@
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "perPage",
             "schema": {
               "type": "integer",
               "example": 10
@@ -62,11 +62,45 @@
           },
           {
             "in": "query",
-            "name": "favourite",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "example": "name"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "example": "asc"
+            },
+            "description": "Sort order"
+          },
+          {
+            "in": "query",
+            "name": "isFavourite",
             "schema": {
               "type": "boolean"
             },
             "description": "Filter by favourite status"
+          },
+          {
+            "in": "query",
+            "name": "contactType",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "work",
+                "personal"
+              ]
+            },
+            "description": "Filter by contact type"
           }
         ],
         "responses": {
@@ -83,12 +117,41 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "Successfully retrieved contacts list!"
+                      "example": "Successfully found contacts!"
                     },
                     "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/contact"
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/contact"
+                          }
+                        },
+                        "page": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "perPage": {
+                          "type": "integer",
+                          "example": 10
+                        },
+                        "totalItems": {
+                          "type": "integer",
+                          "example": 4
+                        },
+                        "totalPages": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "hasNextPage": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "hasPreviousPage": {
+                          "type": "boolean",
+                          "example": false
+                        }
                       }
                     }
                   }
@@ -120,10 +183,8 @@
                 "type": "object",
                 "required": [
                   "name",
-                  "email",
                   "phoneNumber",
-                  "contactType",
-                  "isFavourite"
+                  "contactType"
                 ],
                 "properties": {
                   "name": {
@@ -184,6 +245,9 @@
           },
           "401": {
             "$ref": "#/components/responses/401"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
           }
         }
       }
@@ -334,6 +398,9 @@
           },
           "404": {
             "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
           }
         }
       },
@@ -361,25 +428,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Contact deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "integer",
-                      "example": 200
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Successfully deleted contact!"
-                    }
-                  }
-                }
-              }
-            }
+          "204": {
+            "description": "Contact deleted successfully"
           },
           "401": {
             "$ref": "#/components/responses/401"
@@ -506,6 +556,30 @@
                       "example": "Contact with id 67c1c98de88d76b8da43f1d5 was not found"
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      },
+      "409": {
+        "description": "Conflict Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "status",
+                "message"
+              ],
+              "properties": {
+                "status": {
+                  "type": "integer",
+                  "example": 409
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Email in use"
                 }
               }
             }
